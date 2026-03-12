@@ -11,8 +11,8 @@ Deck layout (slots):
   Slot 1: 24-well deepwell plate, 10 mL (source)
   Slot 2: 96-well deepwell plate, 2.2 mL (intermediate)
   Slot 3: 96-well flat bottom plate, 360 µL (destination)
-  Slot 6: 300 µL tip rack (P300 / channel 0)
-  Slot 9: 1000 µL tip rack (P1000 / channel 1)
+  Slot 6: 200 µL filter tip rack (P300 / channel 0; tip max 200 µL)
+  Slot 9: 1000 µL filter tip rack (P1000 / channel 1; tip max 1000 µL)
 
 IMPORTANT: On the OT-2 dual pipette, pass use_channels=[0] for left (P300) or
 use_channels=[1] for right (P1000). Tip rack and pipette must match.
@@ -51,9 +51,9 @@ deck = OTDeck()
 backend = OpentronsOT2Backend(host=OT2_HOST)
 lh = LiquidHandler(backend=backend, deck=deck)
 
-tip_300 = load_ot_tip_rack("opentrons_96_tiprack_300ul", "300uL")
+tip_200 = load_ot_tip_rack("opentrons_96_filtertiprack_200ul", "200uL")
 tip_1000 = load_ot_tip_rack("opentrons_96_filtertiprack_1000ul", "1000uL")
-deck.assign_child_at_slot(tip_300, 6)
+deck.assign_child_at_slot(tip_200, 6)
 deck.assign_child_at_slot(tip_1000, 9)
 
 plate_24_deep = Cor_Axy_24_wellplate_10mL_Vb(name="plate_24_deep")
@@ -99,9 +99,9 @@ async def run_transfers():
     )
     await lh.return_tips()
 
-    # P300: 96-deepwell → 96-flat (with mix at source)
+    # P300: 96-deepwell → 96-flat (with mix at source; 200 µL max tip volume)
     logger.info("Transfer 2 (P300): 96-deep A1 → 96-flat A1, 100 µL with mix")
-    await lh.pick_up_tips(tip_300["A1"], use_channels=[0])
+    await lh.pick_up_tips(tip_200["A1"], use_channels=[0])
     await lh.aspirate(
         plate_96_deep["A1"],
         vols=[100],
